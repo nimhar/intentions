@@ -22,12 +22,15 @@ from .common import (
     top_features,
 )
 from .cache_utils import load_or_build
+from .datasets import load_penguins_dataset, load_titanic_dataset
 
 DEFAULT_DATASETS: Sequence[DatasetSpec] = (
     DatasetSpec(name="Breast Cancer", loader=load_breast_cancer),
     DatasetSpec(name="Iris", loader=load_iris),
     DatasetSpec(name="Wine", loader=load_wine),
     DatasetSpec(name="Digits", loader=load_digits),
+    DatasetSpec(name="Titanic", loader=load_titanic_dataset),
+    DatasetSpec(name="Penguins", loader=load_penguins_dataset),
 )
 
 
@@ -247,8 +250,8 @@ def plot_spaghetti_comparison(
     )
     fig.text(
         0.5,
-        0.03,
-        "Lines connect identical features under two explanatory intentions. Thicker, darker strokes indicate larger rank disagreements between expected SHAP values and global MCI importance.",
+        0.13,
+        "Lines connect identical features under two explanatory intentions.\nThicker, darker strokes indicate larger rank disagreements between expected SHAP values and global MCI importance.",
         ha="center",
         fontsize=11,
         color="#4a4a4a",
@@ -328,11 +331,11 @@ def plot_global_grid(
         ax.grid(axis="x", linestyle="--", alpha=0.4)
         tau, p_value = result.kendall_tau()
         ax.text(
-            0.02,
+            0.98,
             0.02,
             f"Tau={tau:.2f}\np={p_value:.2g}",
             transform=ax.transAxes,
-            ha="left",
+            ha="right",
             va="bottom",
             fontsize=10,
             bbox={"facecolor": "white", "alpha": 0.7, "boxstyle": "round,pad=0.2"},

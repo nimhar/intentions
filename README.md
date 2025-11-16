@@ -32,6 +32,9 @@ Artifacts are written to `outputs/`:
 | Figure 6 – Separable Sets approximation | `python twomodels_grouped.py` or `python main.py --figures figure6` | `outputs/separable_sets/figure_06_correlation_heatmaps.png` (+ Appendix B5 trend) |
 | Appendix B2/B3 grid | `python mcishap.py` or `python main.py --include-appendix-grid` | `outputs/mci_vs_shap/appendix_grid.png` |
 
+Figure 2 runs on six datasets by default: Breast Cancer, Iris, Wine, Digits, Titanic, and Palmer Penguins.  
+The Titanic CSV (vendored from OpenML `titanic`, version 1) lives at `data/titanic_raw.csv`, and the
+Penguins CSV (from the seaborn data repository) lives at `data/penguins_raw.csv` so every run uses identical data.
 The appendix figures B1, B4, and B5 are generated together with Figures 5 and 6 to keep the experimental
 configuration in sync. JSON files containing Kendall's Tau correlations are saved alongside the figures for
 traceability.
@@ -66,6 +69,9 @@ intentions/
   to ensure that the clustering study uses the same feature information as the model disagreement study.
 - **Outputs** – Each module writes descriptive filenames (for example,
   `figure_05_shap_ranking_rf_vs_xgb.png`). Delete `outputs/` to start over.
+- **Vendored datasets** – `data/titanic_raw.csv` (OpenML) and `data/penguins_raw.csv` (Palmer Penguins)
+  are lightly cleaned before use. Replace these CSVs with alternative preprocesses (matching columns) if you want
+  to explore different variants.
 
 ## Extending the experiments
 

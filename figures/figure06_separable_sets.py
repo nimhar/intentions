@@ -31,7 +31,6 @@ MODEL_PAIRS = [
     ("SVM", "XGBoost"),
 ]
 METHOD_COLUMNS = ["Expected_SHAP", "MCI", "Ablation", "Bivariate"]
-METHOD_PAIRS = list(combinations(METHOD_COLUMNS, 2))
 
 
 def run_separable_set_analysis(
@@ -54,9 +53,6 @@ def run_separable_set_analysis(
     method_df = compute_method_importances(cache_dir)
     method_heatmap_path = output_dir / "figure_06_methods_heatmaps.png"
     plot_method_heatmaps(method_df, linkage, artifacts.feature_names, method_heatmap_path)
-
-    method_trend_path = output_dir / "appendix_b5_methods_kendall.png"
-    plot_method_kendall_trend(method_df, linkage, method_trend_path)
 
     return artifacts
 
@@ -284,44 +280,5 @@ def plot_method_heatmaps(
 
     fig.suptitle("Method-level agreement across separable-set thresholds", fontsize=16, weight="bold")
     fig.tight_layout(rect=[0, 0, 0.9, 1])
-    fig.savefig(output_path, dpi=300, bbox_inches="tight")
-    plt.close(fig)
-
-
-def plot_method_kendall_trend(
-    method_df: pd.DataFrame,
-    linkage_matrix,
-    output_path: Path,
-    *,
-    thresholds: Iterable[float] = (0.0, 0.2, 0.4, 0.6),
-) -> None:
-    tau_records = {f"{a} vs {b}": [] for a, b in METHOD_PAIRS}
-    thresholds = list(thresholds)
-    single_cluster_threshold = None
-
-    for threshold in thresholds:
-        groups = cluster_features(linkage_matrix, threshold, method_df["Feature"])
-        group_df = compute_group_importances(method_df, groups, METHOD_COLUMNS)
-        standardized = group_df.drop(columns="Group").apply(lambda col: col / col.mean())
-        for a, b in METHOD_PAIRS:
-            tau, _ = kendalltau(standardized[a], standardized[b])
-            tau_records[f"{a} vs {b}"].append(tau)
-        if single_cluster_threshold is None and len(groups) == 1:
-            single_cluster_threshold = threshold
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-    palette = sns.color_palette("coolwarm", len(tau_records))
-    for (pair, values), color in zip(tau_records.items(), palette):
-        ax.plot(thresholds, values, marker="o", color=color, label=pair)
-
-    ax.set_xlabel("Correlation Threshold")
-    ax.set_ylabel("Kendall Tau")
-    ax.set_title("Method agreement vs. threshold", fontsize=16)
-    ax.grid(True, linestyle="--", alpha=0.6)
-    if single_cluster_threshold is not None:
-        ax.axvline(single_cluster_threshold, color="black", linestyle="--", linewidth=1.2, label=f"Single cluster at {single_cluster_threshold:.2f}")
-    ax.legend(loc="lower right", ncol=2)
-
-    fig.tight_layout()
     fig.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close(fig)

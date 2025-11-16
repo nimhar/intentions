@@ -144,7 +144,7 @@ def plot_shap_ranking_bump_chart(
             zorder=2,
         )
 
-    fig.suptitle("SHAP Ranking Comparison", fontsize=18, weight="bold", color="#0b1a33", y=0.9)
+    fig.suptitle("SHAP Ranking Comparison Across Different Models", fontsize=18, weight="bold", color="#0b1a33", y=0.9)
     fig.text(
         0.5,
         0.81,
@@ -161,14 +161,14 @@ def plot_shap_ranking_bump_chart(
         fontsize=11,
         color="#4a4a4a",
     )
-    fig.text(
-        0.5,
-        0.05,
-        "Connectors mirror the main SHAP vs. MCI comparison: thicker, darker strokes highlight ranking disagreements.",
-        ha="center",
-        fontsize=10,
-        color="#4a4a4a",
-    )
+    # fig.text(
+    #     0.5,
+    #     0.15,
+    #     "Connectors mirror the main SHAP vs. MCI comparison: thicker, darker strokes highlight ranking disagreements.",
+    #     ha="center",
+    #     fontsize=10,
+    #     color="#4a4a4a",
+    # )
 
     fig.savefig(output_path, dpi=300, bbox_inches="tight")
     plt.close(fig)
@@ -315,8 +315,12 @@ def kendall_tau(values_a: Iterable[float], values_b: Iterable[float]) -> Tuple[f
 
 
 def friendly_label(column: str, accuracy: dict | None = None) -> str:
-    label = column.replace("_SHAP", "").replace("_", " ")
     base = column.replace("_SHAP", "")
+    label = base.replace("_", " ").strip()
+
+    if column.endswith("_SHAP"):
+        label = f"{label} (SHAP)"
+
     if accuracy and base in accuracy:
         train, test = accuracy[base]
         label = f"{label}\n(Train={train:.2f}, Test={test:.2f})"

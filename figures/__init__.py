@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Callable, Dict, Iterable
+
 def _build_figure2(output: Path) -> None:
     from .figure02_mci_vs_shap import run_mci_vs_shap_experiments
 
@@ -43,6 +44,7 @@ def build_appendix_grid(output_dir: Path) -> None:
     from sklearn.datasets import load_breast_cancer, load_digits, load_iris, load_wine
 
     from .common import DatasetSpec
+    from .datasets import load_penguins_dataset, load_titanic_dataset
     from .figure02_mci_vs_shap import plot_global_grid, run_mci_vs_shap_experiments
 
     dataset_specs = (
@@ -50,6 +52,8 @@ def build_appendix_grid(output_dir: Path) -> None:
         DatasetSpec("Iris", load_iris),
         DatasetSpec("Wine", load_wine),
         DatasetSpec("Digits", load_digits),
+        DatasetSpec("Titanic", load_titanic_dataset),
+        DatasetSpec("Penguins", load_penguins_dataset),
     )
     results = run_mci_vs_shap_experiments(output_dir, dataset_specs=dataset_specs)
     plot_global_grid(results, Path(output_dir) / "mci_vs_shap" / "appendix_grid.png")
