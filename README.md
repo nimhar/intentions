@@ -19,23 +19,23 @@ pip install -r requirements.txt
 # Generate every figure (main paper + appendix)
 python main.py --include-appendix-grid
 
-# Generate only a subset (e.g., Figures 2 and 5)
-python main.py --figures figure2 figure5
+# Generate only a subset (e.g., Figure 3 panels)
+python main.py --figures figure3a figure3b
 ```
 
 Artifacts are written to `outputs/`:
 
 | Figure | Command | Output file |
 | --- | --- | --- |
-| Figure 2 – Global Feature Importance (MCI vs. SHAP) | `python mci_vs_shap.py` or `python main.py --figures figure2` | `outputs/mci_vs_shap/*_dual_bars.png` (+ spaghetti + combined plot + tau json) |
-| Figure 5 – SHAP ranking disagreement (RF vs. XGBoost) | `python twomodels.py` or `python main.py --figures figure5` | `outputs/model_consistency/figure_05_shap_ranking_rf_vs_xgb.png` (+ Appendix B1/B4 panels) |
+| Figure 3a – Global Feature Importance (MCI vs. SHAP) | `python main.py --figures figure3a` (aliases: `figure2`) | `outputs/mci_vs_shap/*_dual_bars.png` (+ spaghetti + combined plot + tau json) |
+| Figure 3b – SHAP ranking disagreement (RF vs. XGBoost) | `python main.py --figures figure3b` (alias: `figure5`) | `outputs/model_consistency/figure_03b_shap_ranking_rf_vs_xgb.png` (+ Appendix B1/B4 panels) |
 | Figure 6 – Separable Sets approximation | `python twomodels_grouped.py` or `python main.py --figures figure6` | `outputs/separable_sets/figure_06_correlation_heatmaps.png` (+ Appendix B5 trend) |
 | Appendix B2/B3 grid | `python mcishap.py` or `python main.py --include-appendix-grid` | `outputs/mci_vs_shap/appendix_grid.png` |
 
-Figure 2 runs on six datasets by default: Breast Cancer, Iris, Wine, Digits, Titanic, and Palmer Penguins.  
+Figure 3a runs on six datasets by default: Breast Cancer, Iris, Wine, Digits, Titanic, and Palmer Penguins.  
 The Titanic CSV (vendored from OpenML `titanic`, version 1) lives at `data/titanic_raw.csv`, and the
 Penguins CSV (from the seaborn data repository) lives at `data/penguins_raw.csv` so every run uses identical data.
-The appendix figures B1, B4, and B5 are generated together with Figures 5 and 6 to keep the experimental
+The appendix figures B1, B4, and B5 are generated together with Figures 3b and 6 to keep the experimental
 configuration in sync. JSON files containing Kendall's Tau correlations are saved alongside the figures for
 traceability.
 
@@ -45,15 +45,15 @@ traceability.
 intentions/
 ├── figures/                     # Reusable modules for every figure
 │   ├── common.py                # Dataset helpers + MCI/SHAP utilities
-│   ├── figure02_mci_vs_shap.py  # Figure 2 + appendix B2/B3
-│   ├── figure05_shap_rankings.py# Figure 5 + appendix B1/B4
+│   ├── figure02_mci_vs_shap.py  # Figure 3a + appendix B2/B3
+│   ├── figure05_shap_rankings.py# Figure 3b + appendix B1/B4
 │   ├── figure06_separable_sets.py# Figure 6 + appendix B5
 │   └── model_benchmark.py       # Shared model training + importance summaries
 ├── mci/                         # MCI reference implementation
 ├── main.py                      # CLI dispatcher for figure generation
-├── mci_vs_shap.py               # Shortcut for Figure 2 assets
+├── mci_vs_shap.py               # Shortcut for Figure 3a assets
 ├── mcishap.py                   # Appendix grid (B2 + B3 + digits)
-├── twomodels.py                 # Shortcut for Figures 5/B1/B4
+├── twomodels.py                 # Shortcut for Figures 3b/B1/B4
 ├── twomodels_grouped.py         # Shortcut for Figures 6/B5
 ├── requirements.txt             # Exact dependencies
 └── outputs/                     # Created by the scripts (contains *.png + *.json)
@@ -68,7 +68,7 @@ intentions/
 - **Separable sets** – Figure 6 and Appendix B5 reuse the exact model importances from the benchmark run
   to ensure that the clustering study uses the same feature information as the model disagreement study.
 - **Outputs** – Each module writes descriptive filenames (for example,
-  `figure_05_shap_ranking_rf_vs_xgb.png`). Delete `outputs/` to start over.
+  `figure_03b_shap_ranking_rf_vs_xgb.png`). Delete `outputs/` to start over.
 - **Vendored datasets** – `data/titanic_raw.csv` (OpenML) and `data/penguins_raw.csv` (Palmer Penguins)
   are lightly cleaned before use. Replace these CSVs with alternative preprocesses (matching columns) if you want
   to explore different variants.

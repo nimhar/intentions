@@ -130,8 +130,9 @@ def plot_spaghetti_comparison(
     df["SHAP Rank"] = shap_rank
     df["MCI Rank"] = mci_rank
 
-    df_left = df.sort_values("SHAP Value", ascending=True)
-    df_right = df.sort_values("MCI Value", ascending=True)
+    # Sort so the most important features (rank #1) appear at the top, not the bottom.
+    df_left = df.sort_values("SHAP Value", ascending=False)
+    df_right = df.sort_values("MCI Value", ascending=False)
 
     n_rows = max(len(df_left), len(df_right))
     y_pos_left = np.arange(len(df_left))[::-1]
@@ -211,7 +212,7 @@ def plot_spaghetti_comparison(
 
     ax.text(
         -0.32,
-        n_rows + 0.1,
+        n_rows-0.2,
         "Features ranked by SHAP",
         ha="left",
         va="bottom",
@@ -221,7 +222,7 @@ def plot_spaghetti_comparison(
     )
     ax.text(
         1.32,
-        n_rows + 0.1,
+        n_rows-0.2,
         "Features ranked by MCI",
         ha="right",
         va="bottom",
@@ -231,29 +232,29 @@ def plot_spaghetti_comparison(
     )
 
     subtitle = f"Kendall's Tau = {tau:.3f}, p-value = {p_value:.2g}"
-    fig.suptitle("Global Feature Importance Comparison", fontsize=18, weight="bold", y=0.98, color="#0b1a33")
+    fig.suptitle("Global Feature Importance Comparison", fontsize=18, weight="bold", y=0.95, color="#0b1a33")
     fig.text(
         0.5,
-        0.93,
-        f"{result.dataset_name} — Expected value of local SHAPs vs. Global MCI rankings",
+        0.9,
+        f"Expected value of local SHAPs vs. Global MCI rankings",
         ha="center",
         fontsize=13,
         color="#0b1a33",
     )
     fig.text(
         0.5,
-        0.89,
-        subtitle,
+        0.86,
+        f"Dataset: {result.dataset_name}",
         ha="center",
         fontsize=12,
         color="#4a4a4a",
     )
     fig.text(
         0.5,
-        0.13,
-        "Lines connect identical features under two explanatory intentions.\nThicker, darker strokes indicate larger rank disagreements between expected SHAP values and global MCI importance.",
+        0.88,
+        subtitle,
         ha="center",
-        fontsize=11,
+        fontsize=12,
         color="#4a4a4a",
     )
 

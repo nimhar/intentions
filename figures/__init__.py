@@ -3,13 +3,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Callable, Dict, Iterable
 
-def _build_figure2(output: Path) -> None:
+def _build_figure3a(output: Path) -> None:
     from .figure02_mci_vs_shap import run_mci_vs_shap_experiments
 
     run_mci_vs_shap_experiments(output)
 
 
-def _build_figure5(output: Path) -> None:
+def _build_figure3b(output: Path) -> None:
     from .figure05_shap_rankings import run_model_consistency_study
 
     run_model_consistency_study(output)
@@ -22,10 +22,16 @@ def _build_figure6(output: Path) -> None:
 
 
 FIGURE_BUILDERS: Dict[str, Callable[[Path], None]] = {
-    "figure2": _build_figure2,
-    "figure5": _build_figure5,
+    # Primary keys (Figure 3 subpanels in the manuscript)
+    "figure3a": _build_figure3a,
+    "figure3b": _build_figure3b,
     "figure6": _build_figure6,
+    # Legacy aliases kept for backward compatibility
+    "figure2": _build_figure3a,
+    "figure5": _build_figure3b,
 }
+
+DEFAULT_FIGURE_ORDER = ("figure3a", "figure3b", "figure6")
 
 
 def build_all_figures(
@@ -33,7 +39,7 @@ def build_all_figures(
     *,
     figure_names: Iterable[str] | None = None,
 ) -> None:
-    selected = list(figure_names) if figure_names else list(FIGURE_BUILDERS.keys())
+    selected = list(figure_names) if figure_names else list(DEFAULT_FIGURE_ORDER)
     for figure in selected:
         if figure not in FIGURE_BUILDERS:
             raise ValueError(f"Unknown figure '{figure}'. Valid options: {sorted(FIGURE_BUILDERS)}")

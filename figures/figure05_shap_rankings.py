@@ -17,12 +17,14 @@ def run_model_consistency_study(output_dir: Path) -> BenchmarkArtifacts:
     output_dir = ensure_output_dir(output_dir / "model_consistency")
     cache_dir = ensure_output_dir(output_dir / "cache")
     artifacts = prepare_model_benchmarks(cache_dir=cache_dir)
+    # Dataset is fixed to the sklearn breast cancer benchmark for these comparisons.
+    artifacts.dataset_name = "Breast Cancer"
 
     plot_shap_ranking_bump_chart(
         artifacts,
         "Random_Forest_SHAP",
         "XGBoost_SHAP",
-        output_dir / "figure_05_shap_ranking_rf_vs_xgb.png",
+        output_dir / "figure_03b_shap_ranking_rf_vs_xgb.png",
     )
     plot_model_bar_comparison(artifacts, output_dir / "appendix_b1_model_importances.png")
     plot_pairwise_spaghetti(
@@ -49,20 +51,25 @@ def plot_shap_ranking_bump_chart(
 ) -> None:
     df = artifacts.importance_df[["Feature", column_left, column_right]].copy()
     df = df.sort_values(column_left, ascending=False).head(top_k)
+    dataset_label = getattr(artifacts, "dataset_name", "Breast Cancer")
 
     df_left = df.sort_values(column_left, ascending=True).set_index("Feature")
     df_right = df.sort_values(column_right, ascending=True).set_index("Feature")
-    y_left = np.arange(len(df_left))[::-1]
-    y_right = np.arange(len(df_right))[::-1]
+    row_gap = 1.1  # Slight stretch to keep spacing consistent with Figure 3a.
+    y_left = np.arange(len(df_left))[::-1] * row_gap
+    y_right = np.arange(len(df_right))[::-1] * row_gap
     left_y = {feat: y for feat, y in zip(df_left.index, y_left)}
     right_y = {feat: y for feat, y in zip(df_right.index, y_right)}
 
     tau, p_value = kendall_tau(df[column_left], df[column_right])
 
-    fig, ax = plt.subplots(figsize=(8.5, 9))
-    fig.subplots_adjust(top=0.75, bottom=0.18)
-    ax.set_xlim(-0.35, 1.35)
-    ax.set_ylim(-0.5, len(df_left) - 0.5)
+    y_min = -0.5 * row_gap
+    y_max = (len(df_left) - 0.5) * row_gap
+
+    fig, ax = plt.subplots(figsize=(9, 10))
+    fig.subplots_adjust(top=0.82, bottom=0.18)
+    ax.set_xlim(-0.4, 1.4)
+    ax.set_ylim(y_min, y_max)
     ax.set_xticks([])
     ax.set_yticks([])
     ax.set_facecolor("white")
@@ -70,9 +77,9 @@ def plot_shap_ranking_bump_chart(
         spine.set_visible(False)
 
     shade = Rectangle(
-        (-0.18, -0.5),
+        (-0.18, y_min),
         1.36,
-        len(df_left),
+        row_gap * len(df_left),
         facecolor="#f8f8f8",
         edgecolor="#d4d4d4",
         linewidth=1.2,
@@ -144,22 +151,30 @@ def plot_shap_ranking_bump_chart(
             zorder=2,
         )
 
-    fig.suptitle("SHAP Ranking Comparison Across Different Models", fontsize=18, weight="bold", color="#0b1a33", y=0.9)
+    fig.suptitle("SHAP Ranking Comparison Across Different Models", fontsize=18, weight="bold", color="#0b1a33", y=0.96)
     fig.text(
         0.5,
-        0.81,
-        f"{friendly_label(column_left, artifacts.accuracy)} vs. {friendly_label(column_right, artifacts.accuracy)}",
+        0.91,
+        f"Dataset: {dataset_label}",
         ha="center",
         fontsize=12,
         color="#0b1a33",
     )
     fig.text(
         0.5,
-        0.775,
+        0.89,
         f"Kendall's Tau = {tau:.3f}, p-value = {p_value:.2g}",
         ha="center",
-        fontsize=11,
+        fontsize=12,
         color="#4a4a4a",
+    )
+    fig.text(
+        0.5,
+        0.85,
+        f"{friendly_label(column_left, artifacts.accuracy, multiline=False)} vs. \n{friendly_label(column_right, artifacts.accuracy, multiline=False)}",
+        ha="center",
+        fontsize=12,
+        color="#0b1a33",
     )
     # fig.text(
     #     0.5,
@@ -314,7 +329,7 @@ def kendall_tau(values_a: Iterable[float], values_b: Iterable[float]) -> Tuple[f
     return kendalltau(series_a, series_b)
 
 
-def friendly_label(column: str, accuracy: dict | None = None) -> str:
+def friendly_label(column: str, accuracy: dict | None = None, multiline: bool = True) -> str:
     base = column.replace("_SHAP", "")
     label = base.replace("_", " ").strip()
 
@@ -323,5 +338,8 @@ def friendly_label(column: str, accuracy: dict | None = None) -> str:
 
     if accuracy and base in accuracy:
         train, test = accuracy[base]
-        label = f"{label}\n(Train={train:.2f}, Test={test:.2f})"
+        if multiline:
+            label = f"{label}\n(Train={train:.2f}, Test={test:.2f})"
+        else:
+            label = f"{label} (Train={train:.2f}, Test={test:.2f})"
     return label
